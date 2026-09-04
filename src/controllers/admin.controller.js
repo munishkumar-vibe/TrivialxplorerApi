@@ -24,7 +24,7 @@ const getPending = (modelKey) => async (req, res, next) => {
     const [data, totalItems] = await Promise.all([
       Model.find({ status: 'pending' })
         .select(select)
-        .populate('author', 'name email')
+        .populate('author', 'username firstName lastName email')
         .sort({ createdAt: 1 })
         .skip(skip)
         .limit(limit)

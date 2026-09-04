@@ -24,4 +24,18 @@ const authRateLimiter = rateLimit({
   },
 });
 
-module.exports = { globalRateLimiter, authRateLimiter };
+// Throttles state-changing social actions (e.g. follow/unfollow) to stop
+// scripted mass-follow abuse without affecting normal browsing.
+const writeRateLimiter = rateLimit({
+  windowMs: Number(process.env.WRITE_RATE_LIMIT_WINDOW_MS) || 60 * 1000,
+  max: Number(process.env.WRITE_RATE_LIMIT_MAX) || 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "You're doing that too fast. Please slow down.",
+    data: null,
+  },
+});
+
+module.exports = { globalRateLimiter, authRateLimiter, writeRateLimiter };
