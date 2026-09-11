@@ -112,6 +112,32 @@ const getBlogPosts = async (req, res, next) => {
   }
 };
 
+// GET /api/blog/:id/next — the chronologically next (older) published post.
+// Wraps around to the newest post when the current one is the oldest, so the
+// button is never a dead end. Returns { id } or { id: null } if none exist.
+const getNextBlogPost = async (req, res, next) => {
+  try {
+    const current = await BlogPost.findById(req.params.id).select('_id createdAt');
+    if (!current) return next(new ApiError(404, 'Post not found.'));
+
+    const base = { status: { $in: PUBLIC_STATUSES }, _id: { $ne: current._id } };
+
+    // The next post is the newest one strictly older than the current post.
+    let nextPost = await BlogPost.findOne({ ...base, createdAt: { $lt: current.createdAt } })
+      .sort({ createdAt: -1 })
+      .select('_id');
+
+    // None older → wrap around to the newest published post.
+    if (!nextPost) {
+      nextPost = await BlogPost.findOne(base).sort({ createdAt: -1 }).select('_id');
+    }
+
+    sendResponse(res, 200, 'Next post.', { id: nextPost ? nextPost._id.toString() : null });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const deleteBlogPost = async (req, res, next) => {
   try {
     const isAdmin = req.user.role === 'admin';
@@ -128,4 +154,4 @@ const deleteBlogPost = async (req, res, next) => {
   }
 };
 
-module.exports = { createBlogPost, updateBlogPost, getBlogPostById, getBlogPosts, deleteBlogPost };
+module.exports = { createBlogPost, updateBlogPost, getBlogPostById, getBlogPosts, getNextBlogPost, deleteBlogPost };

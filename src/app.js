@@ -15,6 +15,8 @@ const exploreRoutes   = require("./routes/explore.routes");
 const adminRoutes     = require("./routes/admin.routes");
 const followRoutes    = require("./routes/follow.routes");
 const usersRoutes     = require("./routes/users.routes");
+const likeRoutes      = require("./routes/like.routes");
+const notificationRoutes = require("./routes/notification.routes");
 const ApiError = require("./utils/ApiError");
 
 const app = express();
@@ -66,6 +68,8 @@ app.use("/api/explore",   exploreRoutes);
 app.use("/api/admin",     adminRoutes);
 app.use("/api/follow",    followRoutes);
 app.use("/api/users",     usersRoutes);
+app.use("/api/like",      likeRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // 404 handler
 app.use((_req, _res, next) => {
