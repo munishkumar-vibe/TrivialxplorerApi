@@ -1,0 +1,31 @@
+const mongoose = require('mongoose');
+
+// A single, generic notification collection. There is intentionally NO
+// per-type model (no LikeNotification / FollowNotification). New types are
+// added by writing a new `type` value + a frontend config entry — the schema
+// never changes.
+const notificationSchema = new mongoose.Schema(
+  {
+    // Who receives the notification
+    recipient: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    // Who performed the action
+    actor: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    // Extensible action type: 'like' | 'follow' | 'comment' | ...
+    type: { type: String, required: true },
+    // The model name of the target entity. Must match a registered Mongoose
+    // model name so `entityId` can be populated dynamically via refPath —
+    // this is what keeps population generic (no per-type switch).
+    entityType: { type: String, required: true },
+    // The specific target document; ref resolved at query time from entityType.
+    entityId: { type: mongoose.Schema.Types.ObjectId, required: true, refPath: 'entityType' },
+    isRead: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
+
+// Listing a user's notifications newest-first.
+notificationSchema.index({ recipient: 1, createdAt: -1 });
+// Unread-count badge query.
+notificationSchema.index({ recipient: 1, isRead: 1 });
+
+module.exports = mongoose.model('Notification', notificationSchema);
