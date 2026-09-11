@@ -69,7 +69,7 @@ const updateBlogPost = async (req, res, next) => {
 
 const getBlogPostById = async (req, res, next) => {
   try {
-    const post = await BlogPost.findById(req.params.id).populate('author', 'name');
+    const post = await BlogPost.findById(req.params.id).populate('author', 'firstName lastName username');
     if (!post) return next(new ApiError(404, 'Post not found.'));
 
     const isOwner = post.author?._id?.toString() === req.user._id.toString();
@@ -98,7 +98,7 @@ const getBlogPosts = async (req, res, next) => {
     }
 
     const [data, totalItems] = await Promise.all([
-      BlogPost.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }).populate('author', 'name'),
+      BlogPost.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }).populate('author', 'firstName lastName username'),
       BlogPost.countDocuments(filter),
     ]);
 

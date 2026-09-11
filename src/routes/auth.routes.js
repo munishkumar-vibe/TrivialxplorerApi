@@ -24,6 +24,7 @@ router.post("/reset-password", authRateLimiter, resetPasswordValidator, validate
 router.get("/verify", controller.verifySession);
 
 // Protected routes
-router.get("/me", protect, controller.getMe);
+router.get("/me",       protect, controller.getMe);
+router.get("/me/stats", protect, controller.getMyStats);
 
 module.exports = router;

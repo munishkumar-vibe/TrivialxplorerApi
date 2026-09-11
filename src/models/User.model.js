@@ -73,8 +73,16 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+// Full display name. Sensitive fields stay `select: false`, so enabling
+// virtuals here never exposes password/refreshTokens/reset fields.
+userSchema.virtual("name").get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

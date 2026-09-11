@@ -1,5 +1,8 @@
 const Video = require('../models/Video.model');
 const sendResponse = require('../utils/ApiResponse');
+const ApiError = require('../utils/ApiError');
+
+const PUBLIC_STATUSES = ['approved'];
 
 const createVideo = async (req, res, next) => {
   try {
@@ -53,4 +56,21 @@ const getVideos = async (req, res, next) => {
   }
 };
 
-module.exports = { createVideo, getVideos };
+const getVideoById = async (req, res, next) => {
+  try {
+    const video = await Video.findById(req.params.id).populate('author', 'firstName lastName username');
+    if (!video) return next(new ApiError(404, 'Video not found.'));
+
+    const isOwner = video.author?._id?.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin';
+    if (!PUBLIC_STATUSES.includes(video.status) && !isOwner && !isAdmin) {
+      return next(new ApiError(404, 'Video not found.'));
+    }
+
+    sendResponse(res, 200, 'Video fetched.', video);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { createVideo, getVideos, getVideoById };

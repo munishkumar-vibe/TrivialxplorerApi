@@ -18,14 +18,14 @@ const getExploreData = async (req, res, next) => {
       fetchBlogs
         ? BlogPost.find(baseFilter)
             .select('title description imageUrl author createdAt viewCount wordCount status')
-            .populate('author', 'username')
+            .populate('author', 'firstName lastName username')
             .sort({ createdAt: -1 })
             .lean()
         : [],
       fetchItins
         ? Itinerary.find(baseFilter)
             .select('title description coverImageUrl author createdAt viewCount totalDays difficulty region status')
-            .populate('author', 'username')
+            .populate('author', 'firstName lastName username')
             .sort({ createdAt: -1 })
             .lean()
         : [],

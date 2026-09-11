@@ -1,5 +1,8 @@
 const authService = require("../services/auth.service");
 const sendResponse = require("../utils/ApiResponse");
+const BlogPost  = require("../models/BlogPost.model");
+const Itinerary = require("../models/Itinerary.model");
+const Video     = require("../models/Video.model");
 
 const signup = async (req, res, next) => {
   try {
@@ -83,6 +86,27 @@ const getMe = async (req, res, next) => {
   }
 };
 
+const getMyStats = async (req, res, next) => {
+  try {
+    const uid = req.user._id;
+    const [blogs, itineraries, videos] = await Promise.all([
+      BlogPost.countDocuments({ author: uid }),
+      Itinerary.countDocuments({ author: uid }),
+      Video.countDocuments({ author: uid }),
+    ]);
+    sendResponse(res, 200, "Stats fetched.", {
+      posts: blogs + itineraries + videos,
+      blogs,
+      itineraries,
+      videos,
+      followers: 0,
+      following: 0,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const verifySession = async (req, res, next) => {
   try {
     const valid = await authService.verifySession(req);
@@ -93,4 +117,4 @@ const verifySession = async (req, res, next) => {
   }
 };
 
-module.exports = { signup, signin, refreshToken, signout, forgotPassword, resetPassword, getMe, verifySession };
+module.exports = { signup, signin, refreshToken, signout, forgotPassword, resetPassword, getMe, getMyStats, verifySession };

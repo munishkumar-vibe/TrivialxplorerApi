@@ -32,6 +32,13 @@ const errorHandler = (err, _req, res, _next) => {
     isOperational = true;
   }
 
+  // Mongoose cast error (e.g. invalid ObjectId reaching a query)
+  if (err.name === 'CastError') {
+    statusCode = 400;
+    message = 'Invalid identifier.';
+    isOperational = true;
+  }
+
   // Mongoose validation error
   if (err.name === 'ValidationError') {
     statusCode = 400;
